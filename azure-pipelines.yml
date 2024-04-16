@@ -1,0 +1,68 @@
+# Maven
+# Build your Java project and run tests with Apache Maven.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/java
+ 
+trigger:
+- master
+ 
+pool:
+  vmImage: ubuntu-latest
+ 
+steps:
+- task: Maven@3
+  inputs:
+    mavenPomFile: './pom.xml'
+    mavenOptions: '-Xmx3072m'
+    javaHomeOption: 'JDKVersion'
+    jdkVersionOption: '17'
+    jdkArchitectureOption: 'x64'
+    publishJUnitResults: true
+    testResultsFiles: '**/surefire-reports/TEST-*.xml'
+    goals: 'test'
+  condition: always()
+ 
+- task: PowerShell@2
+  displayName: 'Send Email Report'
+  inputs:
+    targetType: 'inline'
+    script: |
+      $smtpServer = "smtp-mail.outlook.com"
+      $smtpFrom = "meet.dhameliya@3eco.com"
+      $smtpTo = "om.patel@3eco.com"
+      $smtpUser = "meetundhad015@gmail.com"
+      $smtpPass = "app-specific-password"  # Ensure you're using an app-specific password if using 2FA
+      $messageSubject = "Extent Report"
+      $messageBody = "Attached is the Extent Report from the latest test run."
+      $attachmentPath = "./test-output/extentReport.html"
+      
+      $smtpClient = New-Object System.Net.Mail.SmtpClient($smtpServer, 587)
+      $smtpClient.EnableSsl = $true
+      $smtpClient.UseDefaultCredentials = $false
+      $smtpClient.Credentials = New-Object System.Net.NetworkCredential($smtpUser, $smtpPass)
+      
+      $message = New-Object System.Net.Mail.MailMessage
+      $message.From = $smtpFrom
+      $message.To.Add($smtpTo)
+      $message.Subject = $messageSubject
+      $message.Body = $messageBody
+      
+      if (Test-Path $attachmentPath) {
+          $attachment = New-Object System.Net.Mail.Attachment($attachmentPath)
+          $message.Attachments.Add($attachment)
+      } else {
+          Write-Error "Attachment file not found: $attachmentPath"
+      }
+ 
+      try {
+          $smtpClient.Send($message)
+          Write-Host "Email sent successfully"
+      } catch {
+          Write-Error "An error occurred while sending the email: $_"
+      } finally {
+          $message.Dispose()
+          if ($attachment -ne $null) {
+              $attachment.Dispose()
+          }
+      }
+  condition: always()
