@@ -29,7 +29,7 @@ steps:
     script: |
       $smtpServer = "smtp-mail.outlook.com"
       $smtpFrom = "meetnakrani013@gmail.com"
-      $smtpTo = "dummy.night123@gmail.com"
+      $smtpTo = "vishva.nagaria@productsquads.co"
       $smtpUser = "meetnakrani013@gmail.com"
       $smtpPass = "drquurmsafhtdgwp"  # Ensure you're using an app-specific password if using 2FA
       $messageSubject = "Extent Report"
