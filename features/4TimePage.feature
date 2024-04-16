@@ -14,20 +14,20 @@ Scenario: User wants to see timesheet of the employee
 When user enter  employee name
 And click on view 
 Then user should see the timesheet records of employee
-@login33
+@login11
 Scenario: User want to see project reports
 Given user is on Reports page
 When User enter Project name and project data range 
 And click on view button
 Then user should see the projects reports
 
-@login33
+@login11
 Scenario: User want to see employee reports
 Given user is on the Reports page
 When User enter Employee name and Project name and project data range 
 And click on  the view button
 Then user should see the employee reports
-@login44
+@login11
 Scenario: User want to edit customer records from project info
 Given user is on project info page
 When user click on edit icon in found records

@@ -4,13 +4,13 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.openqa.selenium.WebDriver;
-import org.testng.asserts.SoftAssert;
 
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import pageObjects.LoginPageOrangeObjects;
 import utilities.BaseClass;
+
 
 public class LoginPageOrangeSteps {
 
@@ -23,6 +23,11 @@ public class LoginPageOrangeSteps {
 		this.driver = BaseClass.getDriver();
 		this.prop = BaseClass.getProperties();
 		this.logger = BaseClass.getLogger();
+		
+		
+		
+
+
 	}
 
 	LoginPageOrangeObjects obj;
@@ -33,6 +38,8 @@ public class LoginPageOrangeSteps {
 		obj = new LoginPageOrangeObjects(driver);
 		logger.info("*****************opening url*****************");
 		obj.portalLoginPage(prop.getProperty("URL"));
+		
+		
 
 	}
 
@@ -46,7 +53,11 @@ public class LoginPageOrangeSteps {
 	public void click_on_login_button() {
 
 		obj.clickLogin();
+		
+		
+			
 	}
+	
 
 	@Then("User gets {string} message and access to portal is denied")
 	public void user_gets_message_and_access_to_portal_is_denied(String string) {

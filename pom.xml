@@ -20,6 +20,12 @@
 			<artifactId>selenium-java</artifactId>
 			<version>4.8.2</version>
 		</dependency>
+		
+		 <dependency>
+		  <groupId>com.alautomation</groupId>
+  <artifactId>GitCoPilot</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+	  </dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>

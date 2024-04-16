@@ -15,14 +15,13 @@ import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
-import org.xml.sax.Locator;
 
 public class SeleniumMethods {
 
 	public StringSelection stringSelection;
 	public Clipboard clipboard;
 	// Define objects
-	private WebDriver driver;
+	protected WebDriver driver;
 	private WebDriverWait wait;
 
 	// Declare objects

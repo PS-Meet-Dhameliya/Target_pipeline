@@ -14,7 +14,7 @@ When User enter invalid credentials
 And click on Login button
 Then User gets "Invalid credentials" message and access to portal is denied
  
-@login
+@login11
 Scenario: User login with valid username and password
  
 When User enter valid username and password

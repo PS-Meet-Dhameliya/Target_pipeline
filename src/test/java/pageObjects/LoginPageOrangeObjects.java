@@ -2,8 +2,9 @@ package pageObjects;
  
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
- 
+
 import utilities.SeleniumMethods;
+
  
 public class LoginPageOrangeObjects extends SeleniumMethods {
 	
@@ -30,12 +31,20 @@ public class LoginPageOrangeObjects extends SeleniumMethods {
 		sendKeys(usernameField,username);
 		sendKeys(passwordField,Password);
 		
+		
+		
 	}
 	
 	
 	
 	public void clickLogin() {
 		clickOn(LoginButton);
+		
+		
+		
+		
+		
+		
 	}
 	
 	public String getErrorMessageText() {

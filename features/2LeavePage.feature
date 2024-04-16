@@ -15,7 +15,7 @@ Scenario: Search Leave
 		When I fill out the Serach Leave form with valid data
 		And Click on Search button
 		Then I should see the leave records
-@login111
+@login11
 Scenario Outline: Entering valid From date and To date
    
     When I Enter a From date of "<from_date>" and To date of "<to_date>" from the date picker
@@ -27,7 +27,7 @@ Scenario Outline: Entering valid From date and To date
       | 2022-02-01 | 2022-02-28 |
       | 2022-03-01 | 2022-03-31 |
        
-@login22
+@login11
 Scenario: Entering invalid From date and To date
     When I Enter invalid input From date of "ifrom_date" and To date of "ito_date" from the date picker
     Then I should see an error message
