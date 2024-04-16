@@ -31,7 +31,7 @@ steps:
       $smtpFrom = "meet.dhameliya@3eco.com"
       $smtpTo = "om.patel@3eco.com"
       $smtpUser = "meetundhad015@gmail.com"
-      $smtpPass = "app-specific-password"  # Ensure you're using an app-specific password if using 2FA
+      $smtpPass = "meet@123"  # Ensure you're using an app-specific password if using 2FA
       $messageSubject = "Extent Report"
       $messageBody = "Attached is the Extent Report from the latest test run."
       $attachmentPath = "./test-output/extentReport.html"
