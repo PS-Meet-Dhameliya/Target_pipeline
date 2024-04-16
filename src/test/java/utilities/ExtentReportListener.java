@@ -27,7 +27,7 @@ public class ExtentReportListener implements ConcurrentEventListener {
     }
 
     private void onTestRunStarted(TestRunStarted event) {
-        htmlReporter = new ExtentHtmlReporter(".//target/extentReport.html");
+        htmlReporter = new ExtentHtmlReporter(".//test-output/extentReport.html");
         htmlReporter.config().setTheme(Theme.DARK);
         extent = new ExtentReports();
         extent.attachReporter(htmlReporter);
