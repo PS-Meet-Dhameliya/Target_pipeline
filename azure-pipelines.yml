@@ -28,10 +28,10 @@ steps:
     targetType: 'inline'
     script: |
       $smtpServer = "smtp-mail.outlook.com"
-      $smtpFrom = "meet.dhameliya@3eco.com"
-      $smtpTo = "om.patel@3eco.com"
-      $smtpUser = "meetundhad015@gmail.com"
-      $smtpPass = "meet@123"  # Ensure you're using an app-specific password if using 2FA
+      $smtpFrom = "meetnakrani013@gmail.com"
+      $smtpTo = "dummy.night123@gmail.com"
+      $smtpUser = "meetnakrani013@gmail.com"
+      $smtpPass = "drquurmsafhtdgwp"  # Ensure you're using an app-specific password if using 2FA
       $messageSubject = "Extent Report"
       $messageBody = "Attached is the Extent Report from the latest test run."
       $attachmentPath = "./test-output/extentReport.html"
