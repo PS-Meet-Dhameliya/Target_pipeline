@@ -44,7 +44,7 @@ steps:
           text = $message
       }
       Invoke-RestMethod -Uri $webhookUrl -Method Post -ContentType 'Application/Json' -Body $body
-  condition: succeeded()  # Notify only on successful build
+  condition: succeededOrFailed()  # Notify only on successful build
 
 # Send Email Report
 - task: PowerShell@2
