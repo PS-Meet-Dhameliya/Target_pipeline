@@ -21,6 +21,22 @@ steps:
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
     goals: 'test'
   condition: always()
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: './test-output/extentReport.html'
+    ArtifactName: 'ExtentReport'
+    publishLocation: 'Container'
+  
+- powershell: |
+    $webhookUrl = "https://productsquads1.webhook.office.com/webhookb2/4d6e9b07-b8aa-4ec5-bdcf-1c05451d24f4@058c37d3-71cf-4a95-94a5-033acaf07be5/IncomingWebhook/8204f476a94c4348a399676d0e18f85f/7f6afc71-82c6-43c2-a22c-9ecd77c72e89"
+    $message = "Build successful! View the Extent Report: $(Build.ArtifactStagingDirectory)/ExtentReport"
+    $body = ConvertTo-Json -Depth 10 @{
+        text = $message
+    }
+    Invoke-RestMethod -Uri $webhookUrl -Method Post -ContentType 'Application/Json' -Body $body
+  displayName: 'Notify Teams'
+
+
  
 - task: PowerShell@2
   displayName: 'Send Email Report'
