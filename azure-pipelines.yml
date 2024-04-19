@@ -50,7 +50,7 @@ steps:
       $token = $tokenResponse.access_token
       # Write the token to a file or output it to be used in subsequent tasks
       Write-Host "##vso[task.setvariable variable=accessToken;issecret=true]$token"
-      condition: succeededOrFailed()
+      condition: always()
 
 - task: PowerShell@2
   displayName: 'Upload Report to SharePoint'
