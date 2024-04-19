@@ -81,7 +81,7 @@ steps:
       $headers = @{
           "Authorization" = "Bearer $accessToken"
           "accept" = "application/json;odata=verbose"
-          "content-length" = "application/octet-stream"
+          "content-length" = "text/html"
       }
 
       # Try to upload the file
