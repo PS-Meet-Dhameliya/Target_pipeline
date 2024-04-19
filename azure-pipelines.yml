@@ -47,7 +47,7 @@ steps:
       Write-Host "Library Name: $libraryName"
 
       # Encode the file content
-      $fileContent = Get-Content -Path $filePath -Encoding Byte -ReadCount 0
+      $fileContent = [System.IO.File]::ReadAllBytes($filePath)
       $fileInfo = [System.IO.FileInfo]$filePath
       $uploadUrl = "$sharePointUrl/_api/web/GetFolderByServerRelativeUrl('$libraryName')/Files/Add(url='$($fileInfo.Name)', overwrite=true)"
       
