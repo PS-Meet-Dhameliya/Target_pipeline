@@ -38,19 +38,22 @@ steps:
       $tenantId = "058c37d3-71cf-4a95-94a5-033acaf07be5"
       $clientId = "c120c22a-996e-4957-94c7-e67f0e1e4b21"
       $clientSecret = "VDz8Q~rHCIYyP5KJpbp-WagopOk6pHMKRmrw~bOJ"
-      $resource = "https://graph.microsoft.com"  # Using Microsoft Graph as the resource
       $body = @{
         grant_type    = "client_credentials"
-        scope         = "https://graph.microsoft.com/.default"
+        scope         = "https://graph.microsoft.com/.default"  # Using 'scope' instead of 'resource'
         client_id     = $clientId
         client_secret = $clientSecret
-        resource      = $resource
       }
       $url = "https://login.microsoftonline.com/$tenantId/oauth2/v2.0/token"
-      $tokenResponse = Invoke-RestMethod -Method Post -Uri $url -Body $body
-      $token = $tokenResponse.access_token
-      # Write the token to a file or output it to be used in subsequent tasks
-      Write-Host "##vso[task.setvariable variable=accessToken;issecret=true]$token"
+      try {
+        $tokenResponse = Invoke-RestMethod -Method Post -Uri $url -Body $body
+        $token = $tokenResponse.access_token
+        Write-Host "##vso[task.setvariable variable=accessToken;issecret=true]$token"
+        Write-Host "Token retrieved successfully"
+      } catch {
+        Write-Error "Failed to retrieve token: $_"
+        exit 1
+      }
       
 
 - task: PowerShell@2
