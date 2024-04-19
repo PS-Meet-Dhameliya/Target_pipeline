@@ -75,7 +75,7 @@ steps:
       # Encode the file content
       $fileContent = [System.IO.File]::ReadAllBytes($filePath)
       $fileInfo = [System.IO.FileInfo]$filePath
-      $uploadUrl = "$sharePointUrl/_api/web/GetFolderByServerRelativeUrl('$libraryName')/Files/Add(url='$($fileInfo.Name)', overwrite=true)"
+      $uploadUrl = "https://productsquads1.sharepoint.com/sites/PipelineDemo/_api/web/GetFolderByServerRelativeUrl('/Shared Documents/Reports')/Files/add(overwrite=true, url='Example')"
       
       # Prepare the request headers
       $headers = @{
