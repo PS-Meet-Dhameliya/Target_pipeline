@@ -89,7 +89,7 @@ steps:
           $response = Invoke-RestMethod -Uri $uploadUrl -Headers $headers -Method Post -Body $fileContent -ContentType "application/octet-stream"
           Write-Host "File uploaded successfully: $($response)"
       } catch {
-          Write-Error "Failed to upload file: $_"
+          Write-Host "Failed to upload file. Status Code: $($_.Exception.Response.StatusCode.Value__)`nError: $($_.Exception.Message)"
       }
   condition: succeededOrFailed()
 
