@@ -22,11 +22,13 @@ steps:
     goals: 'test'
   condition: always()
 - task: PublishBuildArtifacts@1
+  displayName: 'Publish Extent Report'
   inputs:
     PathtoPublish: './test-output/extentReport.html'
     ArtifactName: 'ExtentReport'
     publishLocation: 'Container'
-    condition: succeededOrFailed()
+  condition: succeededOrFailed()  # This will publish the artifact whether the build succeeds or fails
+
 
 - task: PowerShell@2
   displayName: 'Upload Report to SharePoint'
