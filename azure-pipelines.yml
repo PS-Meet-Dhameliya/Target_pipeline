@@ -55,9 +55,13 @@ steps:
           "content-length" = $fileContent.Length
       }
       
-      # Upload the file
-      $response = Invoke-RestMethod -Uri $uploadUrl -Headers $headers -Method Post -Body $fileContent -ContentType "application/octet-stream"
-      Write-Host "File uploaded successfully"
+      try {
+          $response = Invoke-RestMethod -Uri $uploadUrl -Headers $headers -Method Post -Body $fileContent -ContentType "application/octet-stream"
+          Write-Host "File uploaded successfully"
+      } catch {
+          Write-Error "Failed to upload file: $_"
+      }
+  condition: succeededOrFailed()
 
 
 # Send notification to Microsoft Teams with a link to the artifact
