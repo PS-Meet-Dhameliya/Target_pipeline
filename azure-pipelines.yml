@@ -29,6 +29,27 @@ steps:
     publishLocation: 'Container'
   condition: succeededOrFailed()  # This will publish the artifact whether the build succeeds or fails
 
+- task: PowerShell@2
+  displayName: 'Get OAuth Token'
+  inputs:
+    targetType: 'inline'
+    script: |
+      $tenantId = "058c37d3-71cf-4a95-94a5-033acaf07be5"
+      $clientId = "c120c22a-996e-4957-94c7-e67f0e1e4b21"
+      $clientSecret = "VDz8Q~rHCIYyP5KJpbp-WagopOk6pHMKRmrw~bOJ"
+      $resource = "https://graph.microsoft.com"  # Using Microsoft Graph as the resource
+      $body = @{
+        grant_type    = "client_credentials"
+        scope         = "https://graph.microsoft.com/.default"
+        client_id     = $clientId
+        client_secret = $clientSecret
+        resource      = $resource
+      }
+      $url = "https://login.microsoftonline.com/$tenantId/oauth2/v2.0/token"
+      $tokenResponse = Invoke-RestMethod -Method Post -Uri $url -Body $body
+      $token = $tokenResponse.access_token
+      # Write the token to a file or output it to be used in subsequent tasks
+      Write-Host "##vso[task.setvariable variable=accessToken;issecret=true]$token"
 
 - task: PowerShell@2
   displayName: 'Upload Report to SharePoint'
@@ -39,7 +60,7 @@ steps:
       $filePath = "$(Build.SourcesDirectory)/test-output/extentReport.html"
       $sharePointUrl = "https://productsquads1.sharepoint.com/sites/PipelineDemo"
       $libraryName = "Documents"
-      $accessToken = "eyJ0eXAiOiJKV1QiLCJub25jZSI6IkpsS0NyQW9RaGJxcnVOR3hPUzRfSVBPc3c2UUJmTGExUjdRQnBSTnRtUzAiLCJhbGciOiJSUzI1NiIsIng1dCI6InEtMjNmYWxldlpoaEQzaG05Q1Fia1A1TVF5VSIsImtpZCI6InEtMjNmYWxldlpoaEQzaG05Q1Fia1A1TVF5VSJ9.eyJhdWQiOiJodHRwczovL2dyYXBoLm1pY3Jvc29mdC5jb20iLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC8wNThjMzdkMy03MWNmLTRhOTUtOTRhNS0wMzNhY2FmMDdiZTUvIiwiaWF0IjoxNzEzNTE4NTc5LCJuYmYiOjE3MTM1MTg1NzksImV4cCI6MTcxMzUyMjQ3OSwiYWlvIjoiRTJOZ1lMaTc2TEdXYS9rMWpvY1RvbXcyTFY3VUFRQT0iLCJhcHBfZGlzcGxheW5hbWUiOiJNZWV0IERoYW1lbGl5YSIsImFwcGlkIjoiYzEyMGMyMmEtOTk2ZS00OTU3LTk0YzctZTY3ZjBlMWU0YjIxIiwiYXBwaWRhY3IiOiIxIiwiaWRwIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvMDU4YzM3ZDMtNzFjZi00YTk1LTk0YTUtMDMzYWNhZjA3YmU1LyIsImlkdHlwIjoiYXBwIiwib2lkIjoiZGFiMTgxMWQtNjAyNC00ZjY1LWIwYjctMzVlNDdjZjM2NDEwIiwicmgiOiIwLkFUMEEwemVNQmM5eGxVcVVwUU02eXZCNzVRTUFBQUFBQUFBQXdBQUFBQUFBQUFDaEFBQS4iLCJyb2xlcyI6WyJTaXRlcy5SZWFkV3JpdGUuQWxsIiwiRmlsZXMuUmVhZFdyaXRlLkFsbCJdLCJzdWIiOiJkYWIxODExZC02MDI0LTRmNjUtYjBiNy0zNWU0N2NmMzY0MTAiLCJ0ZW5hbnRfcmVnaW9uX3Njb3BlIjoiQVMiLCJ0aWQiOiIwNThjMzdkMy03MWNmLTRhOTUtOTRhNS0wMzNhY2FmMDdiZTUiLCJ1dGkiOiIwXzFUWDlpYjgweUw1UGI1R19OYUFBIiwidmVyIjoiMS4wIiwid2lkcyI6WyIwOTk3YTFkMC0wZDFkLTRhY2ItYjQwOC1kNWNhNzMxMjFlOTAiXSwieG1zX3RjZHQiOjE3MDI4OTQ1NjF9.O7z9v56IBvuv2iImZrfhs0Ny1t78YDDuKgJrcnAoShVx2rVqYbzTPE5PceKPsU2W9GeoMsT7m4S57tz3WsuFxNXn_nRFsgFe2tYX1iWkF0vI-MwuoVjSt-BIjSHZ17-riErskoFZ4EvQ9VyiKBzPx_byMSrKjIYtzWY3j8g_E4ZVo9CVc_CnrV_-9YAaBVCV-a0ZvU1XzzPrmd-7vSOQsgsSUT4iftaLqBQ8Tj0zMlqdTuQ0B_Vwf2R7hwI706lcC15tgdEVur8n-dh0KQJKGJaPatRPDA-VX8h0lc-BheWB9ZqIVm3C1NAA9LejPdHK1xoSsRjGZ5KeyWToa8kAzg"   # Ensure this is securely handled, ideally as a secret
+      $accessToken = "$(accessToken)"   # Ensure this is securely handled, ideally as a secret
 
       # Output for debugging
       Write-Host "File path: $filePath"
