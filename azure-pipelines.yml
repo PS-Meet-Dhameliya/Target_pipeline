@@ -2,13 +2,13 @@
 # Build your Java project and run tests with Apache Maven.
 # Add steps that analyze code, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/java
-
+ 
 trigger:
 - master
-
+ 
 pool:
   vmImage: ubuntu-latest
-
+ 
 steps:
 - task: Maven@3
   inputs:
@@ -21,30 +21,23 @@ steps:
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
     goals: 'test'
   condition: always()
-
-# Publish the Extent Report as an artifact
 - task: PublishBuildArtifacts@1
-  displayName: 'Publish Extent Report'
   inputs:
     PathtoPublish: './test-output/extentReport.html'
     ArtifactName: 'ExtentReport'
     publishLocation: 'Container'
-  condition: succeededOrFailed()  # Publish the report whether the build succeeds or fails
-  
-  
+
 - task: PowerShell@2
   displayName: 'Upload Report to SharePoint'
-
   inputs:
     targetType: 'inline'
     script: |
-      
-          [string]$filePath = "$(Build.SourcesDirectory)/test-output/extentReport.html",      # Path to the file you want to upload
-          [string]$sharePointUrl = "https://productsquads1.sharepoint.com/sites/PipelineDemo/Shared%20Documents/Forms/AllItems.aspx?RootFolder=%2Fsites%2FPipelineDemo%2FShared%20Documents%2FGeneral&FolderCTID=0x01200044AF67D64C322945808AF76A4E518ADE", # SharePoint site URL
-          [string]$libraryName = "Documents",   # Document library name
-          [string]$accessToken = "eyJ0eXAiOiJKV1QiLCJub25jZSI6IkpsS0NyQW9RaGJxcnVOR3hPUzRfSVBPc3c2UUJmTGExUjdRQnBSTnRtUzAiLCJhbGciOiJSUzI1NiIsIng1dCI6InEtMjNmYWxldlpoaEQzaG05Q1Fia1A1TVF5VSIsImtpZCI6InEtMjNmYWxldlpoaEQzaG05Q1Fia1A1TVF5VSJ9.eyJhdWQiOiJodHRwczovL2dyYXBoLm1pY3Jvc29mdC5jb20iLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC8wNThjMzdkMy03MWNmLTRhOTUtOTRhNS0wMzNhY2FmMDdiZTUvIiwiaWF0IjoxNzEzNTE4NTc5LCJuYmYiOjE3MTM1MTg1NzksImV4cCI6MTcxMzUyMjQ3OSwiYWlvIjoiRTJOZ1lMaTc2TEdXYS9rMWpvY1RvbXcyTFY3VUFRQT0iLCJhcHBfZGlzcGxheW5hbWUiOiJNZWV0IERoYW1lbGl5YSIsImFwcGlkIjoiYzEyMGMyMmEtOTk2ZS00OTU3LTk0YzctZTY3ZjBlMWU0YjIxIiwiYXBwaWRhY3IiOiIxIiwiaWRwIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvMDU4YzM3ZDMtNzFjZi00YTk1LTk0YTUtMDMzYWNhZjA3YmU1LyIsImlkdHlwIjoiYXBwIiwib2lkIjoiZGFiMTgxMWQtNjAyNC00ZjY1LWIwYjctMzVlNDdjZjM2NDEwIiwicmgiOiIwLkFUMEEwemVNQmM5eGxVcVVwUU02eXZCNzVRTUFBQUFBQUFBQXdBQUFBQUFBQUFDaEFBQS4iLCJyb2xlcyI6WyJTaXRlcy5SZWFkV3JpdGUuQWxsIiwiRmlsZXMuUmVhZFdyaXRlLkFsbCJdLCJzdWIiOiJkYWIxODExZC02MDI0LTRmNjUtYjBiNy0zNWU0N2NmMzY0MTAiLCJ0ZW5hbnRfcmVnaW9uX3Njb3BlIjoiQVMiLCJ0aWQiOiIwNThjMzdkMy03MWNmLTRhOTUtOTRhNS0wMzNhY2FmMDdiZTUiLCJ1dGkiOiIwXzFUWDlpYjgweUw1UGI1R19OYUFBIiwidmVyIjoiMS4wIiwid2lkcyI6WyIwOTk3YTFkMC0wZDFkLTRhY2ItYjQwOC1kNWNhNzMxMjFlOTAiXSwieG1zX3RjZHQiOjE3MDI4OTQ1NjF9.O7z9v56IBvuv2iImZrfhs0Ny1t78YDDuKgJrcnAoShVx2rVqYbzTPE5PceKPsU2W9GeoMsT7m4S57tz3WsuFxNXn_nRFsgFe2tYX1iWkF0vI-MwuoVjSt-BIjSHZ17-riErskoFZ4EvQ9VyiKBzPx_byMSrKjIYtzWY3j8g_E4ZVo9CVc_CnrV_-9YAaBVCV-a0ZvU1XzzPrmd-7vSOQsgsSUT4iftaLqBQ8Tj0zMlqdTuQ0B_Vwf2R7hwI706lcC15tgdEVur8n-dh0KQJKGJaPatRPDA-VX8h0lc-BheWB9ZqIVm3C1NAA9LejPdHK1xoSsRjGZ5KeyWToa8kAzg"   # OAuth access token with permissions to write to the SharePoint site
-      
-      
+      # Assuming you might want to pass these as variables or just hard-code for now
+      $filePath = "$(Build.SourcesDirectory)/test-output/extentReport.html"
+      $sharePointUrl = "https://productsquads1.sharepoint.com/sites/PipelineDemo"
+      $libraryName = "Documents"
+      $accessToken = "eyJ0eXAiOiJKV1QiLCJub25jZSI6IkpsS0NyQW9RaGJxcnVOR3hPUzRfSVBPc3c2UUJmTGExUjdRQnBSTnRtUzAiLCJhbGciOiJSUzI1NiIsIng1dCI6InEtMjNmYWxldlpoaEQzaG05Q1Fia1A1TVF5VSIsImtpZCI6InEtMjNmYWxldlpoaEQzaG05Q1Fia1A1TVF5VSJ9.eyJhdWQiOiJodHRwczovL2dyYXBoLm1pY3Jvc29mdC5jb20iLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC8wNThjMzdkMy03MWNmLTRhOTUtOTRhNS0wMzNhY2FmMDdiZTUvIiwiaWF0IjoxNzEzNTE4NTc5LCJuYmYiOjE3MTM1MTg1NzksImV4cCI6MTcxMzUyMjQ3OSwiYWlvIjoiRTJOZ1lMaTc2TEdXYS9rMWpvY1RvbXcyTFY3VUFRQT0iLCJhcHBfZGlzcGxheW5hbWUiOiJNZWV0IERoYW1lbGl5YSIsImFwcGlkIjoiYzEyMGMyMmEtOTk2ZS00OTU3LTk0YzctZTY3ZjBlMWU0YjIxIiwiYXBwaWRhY3IiOiIxIiwiaWRwIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvMDU4YzM3ZDMtNzFjZi00YTk1LTk0YTUtMDMzYWNhZjA3YmU1LyIsImlkdHlwIjoiYXBwIiwib2lkIjoiZGFiMTgxMWQtNjAyNC00ZjY1LWIwYjctMzVlNDdjZjM2NDEwIiwicmgiOiIwLkFUMEEwemVNQmM5eGxVcVVwUU02eXZCNzVRTUFBQUFBQUFBQXdBQUFBQUFBQUFDaEFBQS4iLCJyb2xlcyI6WyJTaXRlcy5SZWFkV3JpdGUuQWxsIiwiRmlsZXMuUmVhZFdyaXRlLkFsbCJdLCJzdWIiOiJkYWIxODExZC02MDI0LTRmNjUtYjBiNy0zNWU0N2NmMzY0MTAiLCJ0ZW5hbnRfcmVnaW9uX3Njb3BlIjoiQVMiLCJ0aWQiOiIwNThjMzdkMy03MWNmLTRhOTUtOTRhNS0wMzNhY2FmMDdiZTUiLCJ1dGkiOiIwXzFUWDlpYjgweUw1UGI1R19OYUFBIiwidmVyIjoiMS4wIiwid2lkcyI6WyIwOTk3YTFkMC0wZDFkLTRhY2ItYjQwOC1kNWNhNzMxMjFlOTAiXSwieG1zX3RjZHQiOjE3MDI4OTQ1NjF9.O7z9v56IBvuv2iImZrfhs0Ny1t78YDDuKgJrcnAoShVx2rVqYbzTPE5PceKPsU2W9GeoMsT7m4S57tz3WsuFxNXn_nRFsgFe2tYX1iWkF0vI-MwuoVjSt-BIjSHZ17-riErskoFZ4EvQ9VyiKBzPx_byMSrKjIYtzWY3j8g_E4ZVo9CVc_CnrV_-9YAaBVCV-a0ZvU1XzzPrmd-7vSOQsgsSUT4iftaLqBQ8Tj0zMlqdTuQ0B_Vwf2R7hwI706lcC15tgdEVur8n-dh0KQJKGJaPatRPDA-VX8h0lc-BheWB9ZqIVm3C1NAA9LejPdHK1xoSsRjGZ5KeyWToa8kAzg"   # Ensure this is securely handled, ideally as a secret
+
       # Output for debugging
       Write-Host "File path: $filePath"
       Write-Host "SharePoint URL: $sharePointUrl"
@@ -71,23 +64,18 @@ steps:
       }
   condition: succeededOrFailed()
 
+  
+- powershell: |
+    $webhookUrl = "https://productsquads1.webhook.office.com/webhookb2/4d6e9b07-b8aa-4ec5-bdcf-1c05451d24f4@058c37d3-71cf-4a95-94a5-033acaf07be5/IncomingWebhook/8204f476a94c4348a399676d0e18f85f/7f6afc71-82c6-43c2-a22c-9ecd77c72e89"
+    $message = "Build successful! View the Extent Report: $(Build.ArtifactStagingDirectory)/ExtentReport"
+    $body = ConvertTo-Json -Depth 10 @{
+        text = $message
+    }
+    Invoke-RestMethod -Uri $webhookUrl -Method Post -ContentType 'Application/Json' -Body $body
+  displayName: 'Notify Teams'
 
-# Send notification to Microsoft Teams with a link to the artifact
-- task: PowerShell@2
-  displayName: 'Notify Microsoft Teams'
-  inputs:
-    targetType: 'inline'
-    script: |
-      $webhookUrl = "https://productsquads1.webhook.office.com/webhookb2/4d6e9b07-b8aa-4ec5-bdcf-1c05451d24f4@058c37d3-71cf-4a95-94a5-033acaf07be5/IncomingWebhook/8204f476a94c4348a399676d0e18f85f/7f6afc71-82c6-43c2-a22c-9ecd77c72e89"
-      $buildUrl = "$(System.TeamFoundationCollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)"
-      $message = "Build successful! View the Extent Report [here]($buildUrl)"
-      $body = ConvertTo-Json -Depth 10 @{
-          text = $message
-      }
-      Invoke-RestMethod -Uri $webhookUrl -Method Post -ContentType 'Application/Json' -Body $body
-  condition: succeededOrFailed()  # Notify only on successful build
 
-# Send Email Report
+ 
 - task: PowerShell@2
   displayName: 'Send Email Report'
   inputs:
@@ -119,7 +107,7 @@ steps:
       } else {
           Write-Error "Attachment file not found: $attachmentPath"
       }
-
+ 
       try {
           $smtpClient.Send($message)
           Write-Host "Email sent successfully"
