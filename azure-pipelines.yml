@@ -63,7 +63,7 @@ steps:
     script: |
       # Assuming you might want to pass these as variables or just hard-code for now
       $filePath = "$(Build.SourcesDirectory)/test-output/extentReport.html"
-      $sharePointUrl = "https://productsquads1.sharepoint.com/sites/PipelineDemo"
+      $sharePointUrl = "https://productsquads1.sharepoint.com/sites/PipelineDemo/Shared%20Documents/Forms/AllItems.aspx?RootFolder=%2Fsites%2FPipelineDemo%2FShared%20Documents%2FGeneral&FolderCTID=0x01200044AF67D64C322945808AF76A4E518ADE"
       $libraryName = "Documents"
       $accessToken = "$(accessToken)"   # Ensure this is securely handled, ideally as a secret
 
