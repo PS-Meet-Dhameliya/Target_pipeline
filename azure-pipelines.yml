@@ -81,8 +81,9 @@ steps:
       $headers = @{
           "Authorization" = "Bearer $accessToken"
           "accept" = "application/json;odata=verbose"
-          "content-length" = "application/octet-stream"
       }
+      $uploadUrl = "https://productsquads1.sharepoint.com/sites/PipelineDemo/_api/web/GetFolderByServerRelativeUrl('/Shared Documents/Reports')/Files/add(overwrite=true, url='extentReport.html')"
+      $fileContent = [System.IO.File]::ReadAllBytes($filePath)
 
       # Try to upload the file
       try {
