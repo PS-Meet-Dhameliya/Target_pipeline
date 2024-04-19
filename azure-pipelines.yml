@@ -31,24 +31,34 @@ steps:
     publishLocation: 'Container'
   condition: succeededOrFailed()  # Publish the report whether the build succeeds or fails
   
-# Extract and Send Report to Teams
+  
 - task: PowerShell@2
-  displayName: 'Extract and Send Report to Teams'
   inputs:
     targetType: 'inline'
     script: |
-      $webhookUrl = "https://productsquads1.webhook.office.com/webhookb2/4d6e9b07-b8aa-4ec5-bdcf-1c05451d24f4@058c37d3-71cf-4a95-94a5-033acaf07be5/IncomingWebhook/8204f476a94c4348a399676d0e18f85f/7f6afc71-82c6-43c2-a22c-9ecd77c72e89"
-      $htmlContent = Get-Content './test-output/extentReport.html' -Raw
-      $totalTestsPattern = 'Tests\s+<div class="panel-lead">(\d+)</div>'
-      $totalTests = if ($htmlContent -match $totalTestsPattern) { $matches[1] } else { "N/A" }
-      $testsFailedPattern = 'Fail\s+<div class="panel-lead">(\d+)</div>'
-      $testsFailed = if ($htmlContent -match $testsFailedPattern) { $matches[1] } else { "N/A" }
-      $testsPassedPattern = 'Pass\s+<div class="panel-lead">(\d+)</div>'
-      $testsPassed = if ($htmlContent -match $testsPassedPattern) { $matches[1] } else { "N/A" }
-      $message = "Test Run Summary: Total Tests: $totalTests, Passed: $testsPassed, Failed: $testsFailed"
-      $body = ConvertTo-Json -Depth 10 @{ text = $message }
-      Invoke-RestMethod -Uri $webhookUrl -Method Post -ContentType 'Application/Json' -Body $body
-  condition: succeededOrFailed()
+      param(
+          [string]$filePath = "./test-output/extentReport.html",      # Path to the file you want to upload
+          [string]$sharePointUrl = "https://productsquads1.sharepoint.com/sites/PipelineDemo/Shared%20Documents/Forms/AllItems.aspx?RootFolder=%2Fsites%2FPipelineDemo%2FShared%20Documents%2FGeneral&FolderCTID=0x01200044AF67D64C322945808AF76A4E518ADE", # SharePoint site URL
+          [string]$libraryName = "PipelineDemo",   # Document library name
+          [string]$accessToken    # OAuth access token with permissions to write to the SharePoint site
+      )
+      
+      # Encode the file content
+      $fileContent = Get-Content $filePath -Encoding Byte -ReadCount 0
+      $fileInfo = New-Object IO.FileInfo($filePath)
+      $uploadUrl = "$sharePointUrl/_api/web/GetFolderByServerRelativeUrl('/$libraryName')/Files/Add(url='$($fileInfo.Name)', overwrite=true)"
+      
+      # Prepare the request headers
+      $headers = @{
+          "Authorization" = "Bearer $accessToken"
+          "accept" = "application/json;odata=verbose"
+          "content-length" = $fileContent.Length
+      }
+      
+      # Upload the file
+      $response = Invoke-RestMethod -Uri $uploadUrl -Headers $headers -Method Post -Body $fileContent -ContentType "application/octet-stream"
+      Write-Host "File uploaded successfully"
+
 
 # Send notification to Microsoft Teams with a link to the artifact
 - task: PowerShell@2
