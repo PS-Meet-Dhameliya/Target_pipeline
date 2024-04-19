@@ -33,20 +33,27 @@ steps:
   
   
 - task: PowerShell@2
+  displayName: 'Upload Report to SharePoint'
+
   inputs:
     targetType: 'inline'
     script: |
-      param(
-          [string]$filePath = "./test-output/extentReport.html",      # Path to the file you want to upload
+      
+          [string]$filePath = "$(Build.SourcesDirectory)/test-output/extentReport.html",      # Path to the file you want to upload
           [string]$sharePointUrl = "https://productsquads1.sharepoint.com/sites/PipelineDemo/Shared%20Documents/Forms/AllItems.aspx?RootFolder=%2Fsites%2FPipelineDemo%2FShared%20Documents%2FGeneral&FolderCTID=0x01200044AF67D64C322945808AF76A4E518ADE", # SharePoint site URL
           [string]$libraryName = "Documents",   # Document library name
           [string]$accessToken = "eyJ0eXAiOiJKV1QiLCJub25jZSI6IkpsS0NyQW9RaGJxcnVOR3hPUzRfSVBPc3c2UUJmTGExUjdRQnBSTnRtUzAiLCJhbGciOiJSUzI1NiIsIng1dCI6InEtMjNmYWxldlpoaEQzaG05Q1Fia1A1TVF5VSIsImtpZCI6InEtMjNmYWxldlpoaEQzaG05Q1Fia1A1TVF5VSJ9.eyJhdWQiOiJodHRwczovL2dyYXBoLm1pY3Jvc29mdC5jb20iLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC8wNThjMzdkMy03MWNmLTRhOTUtOTRhNS0wMzNhY2FmMDdiZTUvIiwiaWF0IjoxNzEzNTE4NTc5LCJuYmYiOjE3MTM1MTg1NzksImV4cCI6MTcxMzUyMjQ3OSwiYWlvIjoiRTJOZ1lMaTc2TEdXYS9rMWpvY1RvbXcyTFY3VUFRQT0iLCJhcHBfZGlzcGxheW5hbWUiOiJNZWV0IERoYW1lbGl5YSIsImFwcGlkIjoiYzEyMGMyMmEtOTk2ZS00OTU3LTk0YzctZTY3ZjBlMWU0YjIxIiwiYXBwaWRhY3IiOiIxIiwiaWRwIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvMDU4YzM3ZDMtNzFjZi00YTk1LTk0YTUtMDMzYWNhZjA3YmU1LyIsImlkdHlwIjoiYXBwIiwib2lkIjoiZGFiMTgxMWQtNjAyNC00ZjY1LWIwYjctMzVlNDdjZjM2NDEwIiwicmgiOiIwLkFUMEEwemVNQmM5eGxVcVVwUU02eXZCNzVRTUFBQUFBQUFBQXdBQUFBQUFBQUFDaEFBQS4iLCJyb2xlcyI6WyJTaXRlcy5SZWFkV3JpdGUuQWxsIiwiRmlsZXMuUmVhZFdyaXRlLkFsbCJdLCJzdWIiOiJkYWIxODExZC02MDI0LTRmNjUtYjBiNy0zNWU0N2NmMzY0MTAiLCJ0ZW5hbnRfcmVnaW9uX3Njb3BlIjoiQVMiLCJ0aWQiOiIwNThjMzdkMy03MWNmLTRhOTUtOTRhNS0wMzNhY2FmMDdiZTUiLCJ1dGkiOiIwXzFUWDlpYjgweUw1UGI1R19OYUFBIiwidmVyIjoiMS4wIiwid2lkcyI6WyIwOTk3YTFkMC0wZDFkLTRhY2ItYjQwOC1kNWNhNzMxMjFlOTAiXSwieG1zX3RjZHQiOjE3MDI4OTQ1NjF9.O7z9v56IBvuv2iImZrfhs0Ny1t78YDDuKgJrcnAoShVx2rVqYbzTPE5PceKPsU2W9GeoMsT7m4S57tz3WsuFxNXn_nRFsgFe2tYX1iWkF0vI-MwuoVjSt-BIjSHZ17-riErskoFZ4EvQ9VyiKBzPx_byMSrKjIYtzWY3j8g_E4ZVo9CVc_CnrV_-9YAaBVCV-a0ZvU1XzzPrmd-7vSOQsgsSUT4iftaLqBQ8Tj0zMlqdTuQ0B_Vwf2R7hwI706lcC15tgdEVur8n-dh0KQJKGJaPatRPDA-VX8h0lc-BheWB9ZqIVm3C1NAA9LejPdHK1xoSsRjGZ5KeyWToa8kAzg"   # OAuth access token with permissions to write to the SharePoint site
-      )
       
+      
+      # Output for debugging
+      Write-Host "File path: $filePath"
+      Write-Host "SharePoint URL: $sharePointUrl"
+      Write-Host "Library Name: $libraryName"
+
       # Encode the file content
-      $fileContent = Get-Content $filePath -Encoding Byte -ReadCount 0
-      $fileInfo = New-Object IO.FileInfo($filePath)
-      $uploadUrl = "$sharePointUrl/_api/web/GetFolderByServerRelativeUrl('/$libraryName')/Files/Add(url='$($fileInfo.Name)', overwrite=true)"
+      $fileContent = Get-Content -Path $filePath -Encoding Byte -ReadCount 0
+      $fileInfo = [System.IO.FileInfo]$filePath
+      $uploadUrl = "$sharePointUrl/_api/web/GetFolderByServerRelativeUrl('$libraryName')/Files/Add(url='$($fileInfo.Name)', overwrite=true)"
       
       # Prepare the request headers
       $headers = @{
@@ -54,10 +61,11 @@ steps:
           "accept" = "application/json;odata=verbose"
           "content-length" = $fileContent.Length
       }
-      
+
+      # Try to upload the file
       try {
           $response = Invoke-RestMethod -Uri $uploadUrl -Headers $headers -Method Post -Body $fileContent -ContentType "application/octet-stream"
-          Write-Host "File uploaded successfully"
+          Write-Host "File uploaded successfully: $($response)"
       } catch {
           Write-Error "Failed to upload file: $_"
       }
