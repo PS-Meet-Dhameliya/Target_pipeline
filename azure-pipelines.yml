@@ -26,6 +26,7 @@ steps:
     PathtoPublish: './test-output/extentReport.html'
     ArtifactName: 'ExtentReport'
     publishLocation: 'Container'
+    condition: succeededOrFailed()
 
 - task: PowerShell@2
   displayName: 'Upload Report to SharePoint'
@@ -73,6 +74,7 @@ steps:
     }
     Invoke-RestMethod -Uri $webhookUrl -Method Post -ContentType 'Application/Json' -Body $body
   displayName: 'Notify Teams'
+  condition: succeededOrFailed()
 
 
  
