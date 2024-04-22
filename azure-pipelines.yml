@@ -61,40 +61,27 @@ steps:
   inputs:
     targetType: 'inline'
     script: |
-      # Assuming you might want to pass these as variables or just hard-code for now
       $filePath = "$(Build.SourcesDirectory)/test-output/extentReport.html"
-      $sharePointUrl = "https://productsquads1.sharepoint.com/sites/PipelineDemo/_api/web/GetFolderByServerRelativeUrl('/Shared%20Documents/Reports')/Files/add(overwrite=true, url='extentReport.html')"
-
-      $libraryName = "Documents"
       $accessToken = "$(accessToken)"   # Ensure this is securely handled, ideally as a secret
-
-      # Output for debugging
-      Write-Host "File path: $filePath"
-      Write-Host "SharePoint URL: $sharePointUrl"
-      Write-Host "Library Name: $libraryName"
-
-      # Encode the file content
-      $fileContent = [System.IO.File]::ReadAllBytes($filePath)
-      $fileInfo = [System.IO.FileInfo]$filePath
       $uploadUrl = "https://productsquads1.sharepoint.com/sites/PipelineDemo/_api/web/GetFolderByServerRelativeUrl('/Shared Documents/Reports')/Files/add(overwrite=true, url='extentReport.html')"
-      
-      # Prepare the request headers
+
       $headers = @{
           "Authorization" = "Bearer $accessToken"
-          "accept" = "application/json;odata=verbose"
+          "Accept" = "application/json;odata=verbose"
           "Content-Type" = "application/octet-stream"
       }
 
-      # Try to upload the file
+      $fileContent = [System.IO.File]::ReadAllBytes($filePath)
+
       try {
           $response = Invoke-RestMethod -Uri $uploadUrl -Headers $headers -Method Post -Body $fileContent -ContentType "application/octet-stream"
           Write-Host "File uploaded successfully: $($response)"
       } catch {
           Write-Host "Failed to upload file. Status Code: $($_.Exception.Response.StatusCode.Value__)`nError: $($_.Exception.Message)"
-          $streamReader = [System.IO.StreamReader]::new($_.Exception.Response.GetResponseStream())
-          $responseBody = $streamReader.ReadToEnd()
-          Write-Host "Response Body: $responseBody"
-          $streamReader.Close()
+          if ($_.Exception.Response) {
+              $responseContent = $_.Exception.Response.Content.ReadAsStringAsync().Result
+              Write-Host "Response Content: $responseContent"
+          }
       }
   condition: succeededOrFailed()
 
