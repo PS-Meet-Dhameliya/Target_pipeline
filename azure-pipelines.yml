@@ -63,7 +63,8 @@ steps:
     script: |
       # Assuming you might want to pass these as variables or just hard-code for now
       $filePath = "$(Build.SourcesDirectory)/test-output/extentReport.html"
-      $sharePointUrl = "https://productsquads1.sharepoint.com/sites/PipelineDemo/"
+      $sharePointUrl = "https://productsquads1.sharepoint.com/sites/PipelineDemo/_api/web/GetFolderByServerRelativeUrl('/Shared%20Documents/Reports')/Files/add(overwrite=true, url='extentReport.html')"
+
       $libraryName = "Documents"
       $accessToken = "$(accessToken)"   # Ensure this is securely handled, ideally as a secret
 
@@ -75,14 +76,14 @@ steps:
       # Encode the file content
       $fileContent = [System.IO.File]::ReadAllBytes($filePath)
       $fileInfo = [System.IO.FileInfo]$filePath
-      $uploadUrl = "https://productsquads1.sharepoint.com/sites/PipelineDemo/_api/web/GetFolderByServerRelativeUrl('/Shared Documents/Reports')/Files/add(overwrite=true, url='extentReport.html')"
+      $uploadUrl = "https://productsquads1.sharepoint.com/sites/PipelineDemo/_api/web/GetFolderByServerRelativeUrl('/Shared%20Documents/Reports')/Files/add(overwrite=true, url='extentReport.html')"
       
       # Prepare the request headers
       $headers = @{
           "Authorization" = "Bearer $accessToken"
           "accept" = "application/json;odata=verbose"
       }
-      $uploadUrl = "https://productsquads1.sharepoint.com/sites/PipelineDemo/_api/web/GetFolderByServerRelativeUrl('/Shared Documents/Reports')/Files/add(overwrite=true, url='extentReport.html')"
+      $uploadUrl = "https://productsquads1.sharepoint.com/sites/PipelineDemo/_api/web/GetFolderByServerRelativeUrl('/Shared%20Documents/Reports')/Files/add(overwrite=true, url='extentReport.html')"
       $fileContent = [System.IO.File]::ReadAllBytes($filePath)
 
       # Try to upload the file
