@@ -68,8 +68,8 @@ steps:
     targetType: 'inline'
     script: |
       $filePath = "$(Build.SourcesDirectory)/test-output/extentReport.html"
-      $accessToken = "$(accessToken)"   # Ensure this is securely handled, ideally as a secret
-      $uploadUrl = "https://productsquads1.sharepoint.com/sites/PipelineDemo/_api/web/GetFolderByServerRelativeUrl('/Shared Documents/Reports')/Files/add(overwrite=true, url='extentReport.html')"
+      $accessToken = "$(accessToken)"  # Ensure this is securely handled, ideally as a secret
+      $uploadUrl = "https://productsquads1.sharepoint.com/sites/PipelineDemo/_api/web/GetFolderByServerRelativeUrl('/Shared Documents/Reports')/Files/add(overwrite=true, url='$(filePath | Split-Path -Leaf)')"
 
       $headers = @{
           "Authorization" = "Bearer $accessToken"
@@ -81,12 +81,16 @@ steps:
 
       try {
           $response = Invoke-RestMethod -Uri $uploadUrl -Headers $headers -Method Post -Body $fileContent -ContentType "application/octet-stream"
-          Write-Host "File uploaded successfully: $($response)"
+          Write-Host "File uploaded successfully: $($response.d.Name)"
       } catch {
-          Write-Host "Failed to upload file. Status Code: $($_.Exception.Response.StatusCode.Value__)`nError: $($_.Exception.Message)"
-          if ($_.Exception.Response) {
-              $responseContent = $_.Exception.Response.Content.ReadAsStringAsync().Result
+          Write-Host "Failed to upload file. Status Code: $($_.Exception.Response.StatusCode.Value__) Error: $($_.Exception.Message)"
+          try {
+              $streamReader = [System.IO.StreamReader]::new($_.Exception.Response.GetResponseStream())
+              $responseContent = $streamReader.ReadToEnd()
+              $streamReader.Close()
               Write-Host "Response Content: $responseContent"
+          } catch {
+              Write-Host "Failed to read response content: $_"
           }
       }
   condition: succeededOrFailed()
