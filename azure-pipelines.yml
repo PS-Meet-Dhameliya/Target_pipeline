@@ -69,7 +69,7 @@ steps:
     script: |
       $filePath = "$(Build.SourcesDirectory)/test-output/extentReport.html"
       $fileName = [System.IO.Path]::GetFileName($filePath)
-      $accessToken = "$(accessToken)"  # Ensure this is securely handled, ideally as a secret
+      $accessToken = "$(accessToken)"   # Ensure this is securely handled, ideally as a secret
       $uploadUrl = "https://productsquads1.sharepoint.com/sites/PipelineDemo/_api/web/GetFolderByServerRelativeUrl('/Shared Documents/Reports')/Files/add(overwrite=true, url='$fileName')"
 
       $headers = @{
@@ -85,13 +85,15 @@ steps:
           Write-Host "File uploaded successfully: $($response.d.Name)"
       } catch {
           Write-Host "Failed to upload file. Status Code: $($_.Exception.Response.StatusCode.Value__) Error: $($_.Exception.Message)"
-          try {
-              $streamReader = [System.IO.StreamReader]::new($_.Exception.Response.GetResponseStream())
-              $responseContent = $streamReader.ReadToEnd()
-              $streamReader.Close()
-              Write-Host "Response Content: $responseContent"
-          } catch {
-              Write-Host "Failed to read response content: $_"
+          if ($_.Exception.Response) {
+              try {
+                  $responseContent = $_.Exception.Response.Content.ReadAsStringAsync().Result
+                  Write-Host "Response Content: $responseContent"
+              } catch {
+                  Write-Host "Failed to read response content: $_"
+              }
+          } else {
+              Write-Host "No response content available."
           }
       }
   condition: succeededOrFailed()
