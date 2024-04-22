@@ -68,8 +68,9 @@ steps:
     targetType: 'inline'
     script: |
       $filePath = "$(Build.SourcesDirectory)/test-output/extentReport.html"
+      $fileName = [System.IO.Path]::GetFileName($filePath)
       $accessToken = "$(accessToken)"  # Ensure this is securely handled, ideally as a secret
-      $uploadUrl = "https://productsquads1.sharepoint.com/sites/PipelineDemo/_api/web/GetFolderByServerRelativeUrl('/Shared Documents/Reports')/Files/add(overwrite=true, url='$(filePath | Split-Path -Leaf)')"
+      $uploadUrl = "https://productsquads1.sharepoint.com/sites/PipelineDemo/_api/web/GetFolderByServerRelativeUrl('/Shared Documents/Reports')/Files/add(overwrite=true, url='$fileName')"
 
       $headers = @{
           "Authorization" = "Bearer $accessToken"
