@@ -30,7 +30,7 @@ steps:
   condition: succeededOrFailed()  # This will publish the artifact whether the build succeeds or fails
 
 - task: PowerShell@2
-  displayName: 'Get OAuth Token'
+  displayName: 'Get OAuth Token and Test'
   condition: always()
   inputs:
     targetType: 'inline'
@@ -39,19 +39,24 @@ steps:
       $clientId = "c120c22a-996e-4957-94c7-e67f0e1e4b21"
       $clientSecret = "VDz8Q~rHCIYyP5KJpbp-WagopOk6pHMKRmrw~bOJ"
       $body = @{
-        grant_type    = "client_credentials"
-        scope         = "https://graph.microsoft.com/.default"  # Using 'scope' instead of 'resource'
-        client_id     = $clientId
+        grant_type = "client_credentials"
+        scope = "https://graph.microsoft.com/.default"
+        client_id = $clientId
         client_secret = $clientSecret
       }
       $url = "https://login.microsoftonline.com/$tenantId/oauth2/v2.0/token"
       try {
         $tokenResponse = Invoke-RestMethod -Method Post -Uri $url -Body $body
         $token = $tokenResponse.access_token
+        Write-Host "Token snippet: $($token.Substring(0, 15))..."  # Securely logging part of the token
         Write-Host "##vso[task.setvariable variable=accessToken;issecret=true]$token"
-        Write-Host "Token retrieved successfully"
+        
+        # Perform a test API call
+        $testUrl = "https://productsquads1.sharepoint.com/sites/PipelineDemo/_api/web"
+        $testResponse = Invoke-RestMethod -Uri $testUrl -Headers @{ Authorization = "Bearer $token" }
+        Write-Host "API Test Call Successful: Site Title - $($testResponse.Title)"
       } catch {
-        Write-Error "Failed to retrieve token: $_"
+        Write-Error "Failed to retrieve token or make test API call: $_"
         exit 1
       }
       
