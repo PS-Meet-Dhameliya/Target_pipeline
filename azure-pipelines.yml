@@ -40,7 +40,7 @@ steps:
       $clientSecret = "VDz8Q~rHCIYyP5KJpbp-WagopOk6pHMKRmrw~bOJ"
       $body = @{
         grant_type = "client_credentials"
-        scope = "https://graph.microsoft.com/.default"
+        scope = "https://graph.microsoft.com/.default"  # Correct scope for Microsoft Graph
         client_id = $clientId
         client_secret = $clientSecret
       }
@@ -50,13 +50,14 @@ steps:
         $token = $tokenResponse.access_token
         Write-Host "Token snippet: $($token.Substring(0, 15))..."  # Securely logging part of the token
         Write-Host "##vso[task.setvariable variable=accessToken;issecret=true]$token"
-        
-        # Perform a test API call
-        $testUrl = "https://productsquads1.sharepoint.com/sites/PipelineDemo/_api/web"
+
+        # Perform a test API call to validate token
+        $testUrl = "https://graph.microsoft.com/v1.0/sites/root"
         $testResponse = Invoke-RestMethod -Uri $testUrl -Headers @{ Authorization = "Bearer $token" }
-        Write-Host "API Test Call Successful: Site Title - $($testResponse.Title)"
+        Write-Host "API Test Call Successful: Site ID - $($testResponse.id)"
       } catch {
-        Write-Error "Failed to retrieve token or make test API call: $_"
+        Write-Host "HTTP request failed. Status: $($_.Exception.Response.StatusCode.Value__) Error: $($_.Exception.Message)"
+        Write-Host "Detailed Error: $($_.Exception.Response.Content.ReadAsStringAsync().Result)"
         exit 1
       }
       
