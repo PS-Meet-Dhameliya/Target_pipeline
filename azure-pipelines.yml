@@ -2,13 +2,13 @@
 # Build your Java project and run tests with Apache Maven.
 # Add steps that analyze code, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/java
- 
+
 trigger:
 - master
- 
+
 pool:
   vmImage: ubuntu-latest
- 
+
 steps:
 - task: Maven@3
   inputs:
@@ -21,96 +21,32 @@ steps:
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
     goals: 'test'
   condition: always()
+
+# Publish the Extent Report as an artifact
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Extent Report'
   inputs:
     PathtoPublish: './test-output/extentReport.html'
     ArtifactName: 'ExtentReport'
     publishLocation: 'Container'
-  condition: succeededOrFailed()  # This will publish the artifact whether the build succeeds or fails
+  condition: succeededOrFailed()  # Publish the report whether the build succeeds or fails
 
+# Send notification to Microsoft Teams with a link to the artifact
 - task: PowerShell@2
-  displayName: 'Get OAuth Token and Test'
-  condition: always()
+  displayName: 'Notify Microsoft Teams'
   inputs:
     targetType: 'inline'
     script: |
-      $tenantId = "058c37d3-71cf-4a95-94a5-033acaf07be5"
-      $clientId = "c120c22a-996e-4957-94c7-e67f0e1e4b21"
-      $clientSecret = "VDz8Q~rHCIYyP5KJpbp-WagopOk6pHMKRmrw~bOJ"
-      $body = @{
-        grant_type = "client_credentials"
-        scope = "https://graph.microsoft.com/.default"  # Correct scope for Microsoft Graph
-        client_id = $clientId
-        client_secret = $clientSecret
+      $webhookUrl = "YOUR_WEBHOOK_URL"
+      $buildUrl = "$(System.TeamFoundationCollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)"
+      $message = "Build successful! View the Extent Report [here]($buildUrl)"
+      $body = ConvertTo-Json -Depth 10 @{
+          text = $message
       }
-      $url = "https://login.microsoftonline.com/$tenantId/oauth2/v2.0/token"
-      try {
-        $tokenResponse = Invoke-RestMethod -Method Post -Uri $url -Body $body
-        $token = $tokenResponse.access_token
-        Write-Host "Token snippet: $($token.Substring(0, 15))..."  # Securely logging part of the token
-        Write-Host "##vso[task.setvariable variable=accessToken;issecret=true]$token"
+      Invoke-RestMethod -Uri $webhookUrl -Method Post -ContentType 'Application/Json' -Body $body
+  condition: succeededOrFailed()  # Notify only on successful build
 
-        # Perform a test API call to validate token
-        $testUrl = "https://graph.microsoft.com/v1.0/sites/root"
-        $testResponse = Invoke-RestMethod -Uri $testUrl -Headers @{ Authorization = "Bearer $token" }
-        Write-Host "API Test Call Successful: Site ID - $($testResponse.id)"
-      } catch {
-        Write-Host "HTTP request failed. Status: $($_.Exception.Response.StatusCode.Value__) Error: $($_.Exception.Message)"
-        Write-Host "Detailed Error: $($_.Exception.Response.Content.ReadAsStringAsync().Result)"
-        exit 1
-      }
-      
-
-- task: PowerShell@2
-  displayName: 'Upload Report to SharePoint'
-  inputs:
-    targetType: 'inline'
-    script: |
-      $filePath = "$(Build.SourcesDirectory)/test-output/extentReport.html"
-      $fileName = [System.IO.Path]::GetFileName($filePath)
-      $accessToken = "$(accessToken)"   # Make sure this is being populated correctly
-      $uploadUrl = "https://productsquads1.sharepoint.com/sites/PipelineDemo/_api/web/GetFolderByServerRelativeUrl('/Shared Documents/Reports')/Files/add(overwrite=true, url='$fileName')"
-
-      $headers = @{
-          "Authorization" = "Bearer $accessToken"
-          "Accept" = "application/json;odata=verbose"
-          "Content-Type" = "application/octet-stream"
-      }
-
-      $fileContent = [System.IO.File]::ReadAllBytes($filePath)
-
-      try {
-          $response = Invoke-RestMethod -Uri $uploadUrl -Headers $headers -Method Post -Body $fileContent -ContentType "application/octet-stream"
-          Write-Host "File uploaded successfully: $($response.d.Name)"
-      } catch {
-          Write-Host "Failed to upload file. Status Code: $($_.Exception.Response.StatusCode.Value__) Error: $($_.Exception.Message)"
-          if ($_.Exception.Response -and $_.Exception.Response.Content) {
-              try {
-                  $responseContent = $_.Exception.Response.Content.ReadAsStringAsync().Result
-                  Write-Host "Response Content: $responseContent"
-              } catch {
-                  Write-Host "Failed to read response content: $_"
-              }
-          } else {
-              Write-Host "No response content available or stream already disposed."
-          }
-      }
-  condition: succeededOrFailed()
-
-  
-- powershell: |
-    $webhookUrl = "https://productsquads1.webhook.office.com/webhookb2/4d6e9b07-b8aa-4ec5-bdcf-1c05451d24f4@058c37d3-71cf-4a95-94a5-033acaf07be5/IncomingWebhook/8204f476a94c4348a399676d0e18f85f/7f6afc71-82c6-43c2-a22c-9ecd77c72e89"
-    $message = "Build successful! View the Extent Report: $(Build.ArtifactStagingDirectory)/ExtentReport"
-    $body = ConvertTo-Json -Depth 10 @{
-        text = $message
-    }
-    Invoke-RestMethod -Uri $webhookUrl -Method Post -ContentType 'Application/Json' -Body $body
-  displayName: 'Notify Teams'
-  condition: succeededOrFailed()
-
-
- 
+# Send Email Report
 - task: PowerShell@2
   displayName: 'Send Email Report'
   inputs:
@@ -142,7 +78,7 @@ steps:
       } else {
           Write-Error "Attachment file not found: $attachmentPath"
       }
- 
+
       try {
           $smtpClient.Send($message)
           Write-Host "Email sent successfully"
